@@ -2,18 +2,19 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/krish-srivastava-2305/internals/services"
 	"github.com/labstack/echo/v4"
 )
 
 type RegisterRequest struct {
-	Email            string `json:"email"`
-	Password         string `json:"password"`
-	FirstName        string `json:"first_name"`
-	LastName         string `json:"last_name"`
-	EmergencyContact string `json:"emergency_contact"`
-	DateOfBirth      string `json:"date_of_birth"`
+	Email            string    `json:"email"`
+	Password         string    `json:"password"`
+	FirstName        string    `json:"first_name"`
+	LastName         string    `json:"last_name"`
+	EmergencyContact string    `json:"emergency_contact"`
+	DateOfBirth      time.Time `json:"date_of_birth"`
 }
 
 type LoginRequest struct {
@@ -30,7 +31,7 @@ func RegisterHandler(c echo.Context) error {
 	}
 
 	// Validate required fields
-	if req.Email == "" || req.Password == "" || req.FirstName == "" || req.LastName == "" || req.EmergencyContact == "" || req.DateOfBirth == "" {
+	if req.Email == "" || req.Password == "" || req.FirstName == "" || req.LastName == "" || req.EmergencyContact == "" {
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "All fields are required"})
 	}
 
@@ -40,14 +41,16 @@ func RegisterHandler(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Error hashing password"})
 	}
 
+	surveyDate := time.Now().Add(time.Hour * 24 * 7)
+
 	// Register user
-	user, err := services.RegisterUser(req.Email, hashedPassword, req.FirstName, req.LastName, req.EmergencyContact, req.DateOfBirth)
+	user, err := services.RegisterUser(req.Email, hashedPassword, req.FirstName, req.LastName, req.EmergencyContact, req.DateOfBirth, surveyDate)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
 	}
 
 	// Generate JWT token
-	token, err := services.GenerateToken(user.Email)
+	token, err := services.GenerateToken(user.Email, user.EmergencyContact, user.FirstName, user.SurveyDate)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Error generating token"})
 	}
@@ -90,7 +93,7 @@ func LoginHandler(c echo.Context) error {
 	}
 
 	// Generate JWT token
-	token, err := services.GenerateToken(user.Email)
+	token, err := services.GenerateToken(user.Email, user.EmergencyContact, user.FirstName, user.SurveyDate)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Error generating token"})
 	}

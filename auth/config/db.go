@@ -25,6 +25,7 @@ func ConnectDB() {
 		last_name VARCHAR(255) NOT NULL,
 		emergency_contact VARCHAR(255) NOT NULL,
 		date_of_birth DATE NOT NULL,
+		survey_date DATE NOT NULL,
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	)`)
 

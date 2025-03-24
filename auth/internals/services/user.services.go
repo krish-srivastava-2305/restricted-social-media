@@ -16,9 +16,10 @@ type User struct {
 	LastName         string    `json:"last_name"`
 	EmergencyContact string    `json:"emergency_contact"`
 	DateOfBirth      time.Time `json:"date_of_birth"`
+	SurveyDate       time.Time `json:"survey_date"`
 }
 
-func RegisterUser(email, password, firstName, lastName, emergencyContact, dateOfBirth string) (User, error) {
+func RegisterUser(email string, password string, firstName string, lastName string, emergencyContact string, dateOfBirth time.Time, surveyDate time.Time) (User, error) {
 	db := config.DB
 
 	var exists bool
@@ -31,9 +32,9 @@ func RegisterUser(email, password, firstName, lastName, emergencyContact, dateOf
 	}
 
 	_, err = db.Exec(context.Background(), `
-		INSERT INTO users (email, password, first_name, last_name, emergency_contact, date_of_birth) 
-		VALUES ($1, $2, $3, $4, $5, $6)`,
-		email, password, firstName, lastName, emergencyContact, dateOfBirth,
+		INSERT INTO users (email, password, first_name, last_name, emergency_contact, date_of_birth, survey_date) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+		email, password, firstName, lastName, emergencyContact, dateOfBirth, surveyDate,
 	)
 
 	if err != nil {
@@ -46,6 +47,7 @@ func RegisterUser(email, password, firstName, lastName, emergencyContact, dateOf
 		FirstName:        firstName,
 		LastName:         lastName,
 		EmergencyContact: emergencyContact,
+		SurveyDate:       surveyDate,
 	}, nil
 }
 
@@ -91,6 +93,7 @@ func GetUser(email string) (User, error) {
 		&user.LastName,
 		&user.EmergencyContact,
 		&user.DateOfBirth,
+		&user.SurveyDate,
 	)
 
 	if err != nil {

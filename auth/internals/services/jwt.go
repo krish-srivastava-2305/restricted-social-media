@@ -10,11 +10,14 @@ import (
 
 var secretKey = []byte("secret")
 
-func GenerateToken(payload string) (string, error) {
+func GenerateToken(email string, emergenctContact string, name string, surveyDate time.Time) (string, error) {
 	claims := jwt.MapClaims{
-		"email": payload,
-		"exp":   time.Now().Add(time.Hour * 24).Unix(),
-		"iat":   time.Now().Unix(),
+		"email":             email,
+		"emergency_contact": emergenctContact,
+		"name":              name,
+		"survey_date":       surveyDate,
+		"exp":               time.Now().Add(time.Hour * 24).Unix(),
+		"iat":               time.Now().Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
